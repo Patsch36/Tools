@@ -5,6 +5,16 @@ from googlesearch import search
 
 
 def google_search(query, result_num=1, key_string=None, open_url=True):
+    if result_num == 0 and key_string is None:
+        search_url = f"https://www.google.com/search?q={query}"
+        if open_url:
+            webbrowser.open(search_url)
+            print(f"Öffne: {search_url}")
+        else:
+            pyperclip.copy(search_url)
+            print(f"URL in den Copybuffer kopiert: {search_url}")
+        return
+
     results = list(search(query, num_results=10))  # Top 10 Suchergebnisse
 
     if key_string:
@@ -35,7 +45,7 @@ def main():
     # Definiere mögliche Eingabeparameter
     parser.add_argument("search_term", nargs="?", default=None,
                         help="Der Suchbegriff für Google oder die Ergebnisnummer")
-    parser.add_argument("result_num", nargs="?", default=1,
+    parser.add_argument("result_num", nargs="?", default=0,
                         help="Die Ergebnisnummer oder der Schlüsselbegriff")
     parser.add_argument("-k", "--key", type=str,
                         help="Schlüsselbegriff für Filter in den Suchergebnissen")
@@ -48,10 +58,8 @@ def main():
     if isinstance(args.result_num, str) and not args.result_num.isdigit() and args.key is None:
         args.key = args.result_num  # Nutze `result_num` als `key_string`
         result_num = 1  # Setze `result_num` auf 1 (erstes Ergebnis)
-    elif args.result_num.isdigit():
-        result_num = int(args.result_num)
     else:
-        result_num = 1
+        result_num = int(args.result_num)
 
     # Bestimme den Suchbegriff
     if args.search_term is None:
