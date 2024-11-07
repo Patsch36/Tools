@@ -2,7 +2,7 @@ import argparse
 import os
 import subprocess
 import sys
-from curses_wrapper import MenuSelector
+from tools.curses_wrapper import MenuSelector
 from typing import Dict
 
 
