@@ -25,6 +25,8 @@ Alternatively, for system-specific installations, use the installation scripts i
 - **macOS**: `macos.bash`
 - **Windows**: `windows.bat`
 
+Mind that you may have to restart your terminal on your UNIX System with the `source ~/~/.bashrc` (Linux) or `source ~/.bash_profile` (MacOS) command though the installation scripts should do that.
+
 ## Documentation
 
 Comprehensive documentation for the project can be found on the [Wiki pages](https://github.com/patsch36/tools/wiki).
