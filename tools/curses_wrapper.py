@@ -70,18 +70,3 @@ class MenuSelector:
 
     def select(self):
         return curses.wrapper(self.navigate_menu)
-
-
-# Beispiel für die Verwendung der MenuSelector-Klasse
-def choose_option():
-    items = ["ABC", "BCD", "Option 3", "Option 4", "Option 5"]
-    selector = MenuSelector(
-        items, prompt="Wählen Sie eine Option aus der Liste oder geben Sie eine eigene Eingabe ein:")
-
-    selected_option = selector.select()
-    print(f"Ausgewählte Option: {selected_option}")
-
-
-# Ausführen der Funktion
-if __name__ == "__main__":
-    choose_option()

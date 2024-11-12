@@ -3,9 +3,11 @@ import webbrowser
 import pyperclip
 from googlesearch import search
 from tools.curses_wrapper import MenuSelector
+import os
 
 # Funktion zum Einlesen und Auflösen von Akronymen
-test_file = "acronymes.txt"
+test_file = "~/.acronymes.txt"
+test_file = os.path.expanduser(test_file)
 
 
 def resolve_acronym(ac: str) -> str:
@@ -18,7 +20,7 @@ def resolve_acronym(ac: str) -> str:
                     if acronym == ac:
                         return url
     except FileNotFoundError:
-        print("Die Datei 'akronyme.txt' wurde nicht gefunden.")
+        print(f"Die Datei '{test_file}' wurde nicht gefunden.")
     return None
 
 # Funktion für die Menüauswahl, wenn kein Akronym angegeben wird
@@ -33,7 +35,7 @@ def select_acronym() -> str:
                     acronym, url = line.strip().split(":", 1)
                     acronyms[acronym] = {"url": url}
     except FileNotFoundError:
-        print("Die Datei 'akronyme.txt' wurde nicht gefunden.")
+        print(f"Die Datei '{test_file}' wurde nicht gefunden.")
         return None
 
     # MenuSelector für die Auswahl eines Akronyms
