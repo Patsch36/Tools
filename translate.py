@@ -2,44 +2,56 @@ import pyperclip
 import argparse
 from googletrans import Translator, LANGUAGES
 
-def translate_clipboard(target_language):
-    # Instanziiere den Übersetzer
+
+def translate_text(target_language, text=None):
+    # Instantiate the translator
     translator = Translator()
 
-    # Text aus der Zwischenablage lesen
-    text_to_translate = pyperclip.paste()
-    if not text_to_translate:
-        print("Die Zwischenablage ist leer.")
-        return
+    # Read text from clipboard if no text is provided
+    if text is None:
+        text = pyperclip.paste()
+        if not text:
+            print("The clipboard is empty.")
+            return
+        print(f"Translating the following text to '{
+              LANGUAGES[target_language]}': {text}")
+    else:
+        print(f"Translating to '{LANGUAGES[target_language]}'")
 
     try:
-        # Übersetze den Text
-        translated_text = translator.translate(text_to_translate, dest=target_language)
-        
-        # Überprüfen, ob die Übersetzung erfolgreich war
+        # Translate the text
+        translated_text = translator.translate(text, dest=target_language)
+
+        # Check if the translation was successful
         if translated_text is None:
-            print("Die Übersetzung war nicht erfolgreich.")
+            print("The translation was not successful.")
             return
-        
-        # Übersetzten Text in die Zwischenablage kopieren
+
+        # Copy translated text to clipboard
         pyperclip.copy(translated_text.text)
-        print(f"Übersetzter Text wurde in die Zwischenablage.")
+        print("Translated text has been copied to the clipboard.")
 
     except Exception as e:
-        print(f"Fehler bei der Übersetzung: {e}")
+        print(f"Error during translation: {e}")
+
 
 if __name__ == "__main__":
-    # ArgumentParser erstellen
-    parser = argparse.ArgumentParser(description="Übersetze den Text aus der Zwischenablage in die angegebene Sprache.")
-    parser.add_argument("language", type=str, help="Die Sprache, in die der Text übersetzt werden soll (ISO-Code).")
+    # Create ArgumentParser
+    parser = argparse.ArgumentParser(
+        description="Translate text from the clipboard or the provided text to the specified language.")
+    parser.add_argument(
+        "text", type=str, nargs='?', help="The text to be translated.", default=None)
+    parser.add_argument(
+        "-l", "--language", type=str, help="The language to translate the text to (ISO code).", required=False, default="en")
 
-    # Argumente parsen
+    # Parse arguments
     args = parser.parse_args()
 
-    # Überprüfen, ob die angegebene Sprache gültig ist
+    # Check if the specified language is valid
     if args.language not in LANGUAGES:
-        print("Ungültiger ISO-Code für die Sprache. Verfügbare Sprachen sind:")
-        print(", ".join([f"{lang} ({code})" for code, lang in LANGUAGES.items()]))
+        print("Invalid ISO code for the language. Available languages are:")
+        print(
+            ", ".join([f"{lang} ({code})" for code, lang in LANGUAGES.items()]))
     else:
-        # Übersetzen und in die Zwischenablage kopieren
-        translate_clipboard(args.language)
+        # Translate and copy to clipboard
+        translate_text(args.language, args.text)
