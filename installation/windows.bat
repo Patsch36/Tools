@@ -22,6 +22,11 @@ python -m venv .env
 :: Installiere die Bibliotheken aus requirements.txt
 %TOOLSDIR%\.env\Scripts\python.exe -m pip install -r "%REQUIREMENTS%"
 
+echo ===Installing windows-curses==================================
+
+:: Installiere windows-curses
+%TOOLSDIR%\.env\Scripts\python.exe -m pip install windows-curses
+
 echo ===Creating Custom Scripts=====================================
 
 :: Erstelle die Skripte für jedes Python-Skript im Skripte-Ordner
@@ -36,9 +41,11 @@ for %%f in ("%SCRIPTSDIR%\*") do (
         echo Creating Tool !SCRIPTNAME!
 
         echo @echo off > %TOOLSDIR%\!SCRIPTNAME!.bat
-        echo %TOOLSDIR%\.env\Scripts\python.exe %SCRIPTSDIR%!SCRIPTNAME!.py %%* >> %TOOLSDIR%\!SCRIPTNAME!.bat
+        echo set PYTHONPATH=%SCRIPTSDIR% >> %TOOLSDIR%\!SCRIPTNAME!.bat
+        echo %TOOLSDIR%\.env\Scripts\python.exe "%SCRIPTSDIR%\!SCRIPTNAME!.py" %%* >> "%TOOLSDIR%\!SCRIPTNAME!.bat"
     )
 )
+
 echo ===Adding .tools to PATH=======================================
 
 :: Fügt das .tools Verzeichnis zur PATH-Umgebungsvariable hinzu
