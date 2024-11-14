@@ -2,11 +2,18 @@ import subprocess
 import argparse
 from bs4 import BeautifulSoup
 import pyperclip
+import os
+import requests
 
 
 def fetch_url(url):
-    result = subprocess.run(["curl", url], capture_output=True, text=True)
-    return BeautifulSoup(result.stdout, 'html.parser')
+    result = requests.get(url)
+    soup = None
+    if result.content:
+        soup = BeautifulSoup(result.content, 'html.parser')
+    else:
+        print(f"No HTML content retrieved from {url}")
+    return soup
 
 
 def extract_pip_command(soup):

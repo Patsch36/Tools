@@ -53,12 +53,3 @@ We welcome contributions from everyone! If you have an idea for improving this p
 To get started, see the [contributing guide](CONTRIBUTING.md) for instructions.
 
 Please ensure to follow this project's [Code of Conduct](CODE_OF_CONDUCT.md).
-```
-
-### Erklärung:
-- **Badges**: Ich habe nützliche Badges wie den Lizenzbadge, Python-Version und letzten Commit hinzugefügt. Du kannst diese anpassen oder weitere hinzufügen, z.B. für Build-Status oder Testabdeckung.
-- **Tech Stack**: Da es sich um Python handelt, habe ich den Tech Stack entsprechend angepasst.
-- **Installation und Dokumentation**: Es wird beschrieben, wie das Projekt installiert werden kann, und Links zu den Wiki-Seiten für weitere Details.
-- **Beispiel und Nutzung**: Ein einfaches Beispiel für die Verwendung eines Skripts aus dem Repository wurde hinzugefügt.
-
-Ersetze `your-username` und `your-repo` mit den tatsächlichen Werten, um die Links korrekt anzuzeigen.
