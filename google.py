@@ -85,7 +85,22 @@ class AcronymManager:
             new_url = acronyms[selected_acronym]
 
         if new_url and not new_url.startswith(("http://", "https://")):
-            new_url = "http://" + new_url
+            new_url = "https://" + new_url
+
+        # Test if the URL can be opened with https
+        try:
+            response = requests.head(new_url, allow_redirects=True)
+            if response.status_code >= 400:
+                print(f"Warning: The URL '{new_url}' might not be reachable (status code: {
+                      response.status_code}). Trying http instead.")
+            new_url = "http://" + new_url[8:]  # Replace https with http
+            response = requests.head(new_url, allow_redirects=True)
+            if response.status_code >= 400:
+                print(f"Warning: The URL '{
+                      new_url}' might not be reachable (status code: {response.status_code}).")
+        except requests.RequestException as e:
+            print(f"Error: The URL '{
+                  new_url}' is not reachable. Exception: {e}")
         if new_url and not "www." in new_url:
             new_url = new_url.replace(
                 "http://", "http://www.").replace("https://", "https://www.")
@@ -163,7 +178,7 @@ class GoogleSearchHelper:
     def _handle_result(url, open_url):
         """Opens the URL or copies it to the clipboard."""
         if open_url:
-            webbrowser.open(url)
+            webbrowser.open(url, new=2, autoraise=True)
             print(f"Opening: {url}")
         else:
             pyperclip.copy(url)
@@ -187,7 +202,7 @@ def main():
                         help="URL for the acronym when creating a new one")
     parser.add_argument("-d", "--delete_acronym", type=str, nargs="?",
                         const="", help="Specify acronym to delete or select interactively")
-    parser.add_argument("-c", "--change_acronym", action="store_true",
+    parser.add_argument("-c", "--change_acronym", action="store_true", default=False,
                         help="Specify the acronyme to change.")
 
     args = parser.parse_args()
@@ -201,7 +216,7 @@ def main():
 
     elif args.delete_acronym is not None:
         acronym_manager.delete_acronym(args.delete_acronym)
-    elif args.change_acronym is not None:
+    elif args.change_acronym is True:
         acronym_manager.change_acronym()
 
     elif args.acronym is not None:
@@ -218,7 +233,8 @@ def main():
 
     else:
         query = pyperclip.paste() if args.search_term is None else args.search_term
-        result_num = int(args.result_num) if args.result_num.isdigit() else 1
+        result_num = int(args.result_num) if str(
+            args.result_num).isdigit() else 1
         GoogleSearchHelper.perform_search(
             query, result_num, args.key, not args.url_only)
 
