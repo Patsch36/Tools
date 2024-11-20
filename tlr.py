@@ -3,7 +3,7 @@ import argparse
 from googletrans import Translator, LANGUAGES
 
 
-def translate_text(target_language, text=None):
+def translate_text(target_language, text=None, to_clipboard=True, print_output=True):
     # Instantiate the translator
     translator = Translator()
 
@@ -11,12 +11,15 @@ def translate_text(target_language, text=None):
     if text is None:
         text = pyperclip.paste()
         if not text:
-            print("The clipboard is empty.")
+            if print_output:
+                print("The clipboard is empty.")
             return
-        print(f"Translating the following text to '{
-              LANGUAGES[target_language]}': {text}")
+        if print_output:
+            print(f"Translating the following text to '{
+                  LANGUAGES[target_language]}': {text}")
     else:
-        print(f"Translating to '{LANGUAGES[target_language]}'")
+        if print_output:
+            print(f"Translating to '{LANGUAGES[target_language]}'")
 
     try:
         # Translate the text
@@ -24,15 +27,23 @@ def translate_text(target_language, text=None):
 
         # Check if the translation was successful
         if translated_text is None:
-            print("The translation was not successful.")
+            if print_output:
+                print("The translation was not successful.")
             return
 
         # Copy translated text to clipboard
-        pyperclip.copy(translated_text.text)
-        print("Translated text has been copied to the clipboard.")
+        if to_clipboard:
+            pyperclip.copy(translated_text.text)
+            if print_output:
+                print("Translated text has been copied to the clipboard.")
 
     except Exception as e:
-        print(f"Error during translation: {e}")
+        if print_output:
+            print(f"Error during translation: {e}")
+        else:
+            raise e
+
+    return translated_text.text
 
 
 if __name__ == "__main__":
