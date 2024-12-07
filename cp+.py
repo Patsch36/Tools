@@ -10,8 +10,9 @@ def copy_file(src, dest):
 
     # Create destination directory if it does not exist
     if not os.path.exists(dest):
-        if dest.split('/')[-1].find('.') > 0:
-            os.makedirs(os.path.dirname(dest))
+        if len(os.path.splitext(dest.split('/')[-1])[1])>0:
+            if len(dest.split('/'))>1:
+                os.makedirs(os.path.dirname(dest.split('/')[0:-1]))
         else:
             os.makedirs(dest)
 
