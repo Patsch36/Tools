@@ -3,6 +3,7 @@ import pypandoc
 import os
 import re
 import argparse
+import subprocess
 
 
 template = r"""
@@ -20,9 +21,8 @@ template = r"""
 \usepackage{hyperref}
 
 \usepackage{tabularx}
-\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}} % linksbündig mit Breitenangabe
-\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}} % zentriert mit Breitenangabe
-\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}} % rechtsbündig mit Breitenangabe
+
+\usepackage{listings}
 
 \usepackage{multicol}
 
@@ -37,6 +37,8 @@ template = r"""
 
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+\newcommand{\passthrough}[1]{\lstset{mathescape=false}\texttt{#1}\lstset{mathescape=true}}
 
 \usepackage[headtopline=1pt, headsepline=.5pt, footbotline=1pt, footsepline=.5pt]{scrlayer-scrpage}
 \pagestyle{scrheadings}
@@ -88,15 +90,23 @@ def convert_markdown_to_tex(markdown_file, tex_file, templatefile='Vorlage.tex')
     with open(markdown_file, 'r', encoding='utf-8') as f:
         markdown_content = f.read()
 
-    markdown_content = preprocess_markdown(markdown_content)
+    # markdown_content = preprocess_markdown(markdown_content)
 
-    # Konvertiere Markdown zu HTML
-    html_content = markdown.markdown(markdown_content, extensions=[
-                                     'tables', 'fenced_code', 'toc'])
+    # # Konvertiere Markdown zu HTML
+    # html_content = markdown.markdown(markdown_content, extensions=[
+    #                                  'tables', 'fenced_code', 'toc'])
 
-    # Konvertiere HTML zu TeX
-    tex_content = pypandoc.convert_text(
-        html_content, 'latex', format='html', extra_args=['--listings'])
+    # # Konvertiere HTML zu TeX
+    # tex_content = pypandoc.convert_text(
+    #     html_content, 'latex', format='html', extra_args=['--listings'])
+
+    command = f"pandoc {markdown_file} -o {tex_file}"
+    subprocess.run(command, shell=True)
+    with open(tex_file, 'r', encoding='utf-8') as f:
+        tex_content = f.read()
+
+    tex_content = tex_content.replace(
+        r'\(\(', '$').replace(r'\)\)', '$')
 
     tex_content = template.replace('$$CONTENT$$', tex_content)
 
@@ -106,7 +116,18 @@ def convert_markdown_to_tex(markdown_file, tex_file, templatefile='Vorlage.tex')
 
 
 def convert_tex_to_pdf(tex_file, pdf_file):
-    pypandoc.convert_file(tex_file, 'pdf', outputfile=pdf_file)
+    # pypandoc.convert_file(tex_file, 'pdf', outputfile=pdf_file)
+    print(f"Erstelle PDF-Datei: {pdf_file} aus {tex_file}")
+    command = f"pdflatex {tex_file}"
+    subprocess.run(command, shell=True)
+
+    # Cleanup
+    filename = tex_file.split('.')[0]
+    filenames = [f"{filename}.{ext}" for ext in [
+        'aux', 'log', 'out', 'toc', 'tex', 'fdb_latexmk', 'fls']]
+    # for filename in filenames:
+    #     if os.path.exists(filename):
+    #         os.remove(filename)
 
 
 if __name__ == "__main__":
@@ -121,8 +142,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     convert_markdown_to_tex(args.input_file, args.output_file)
-    print(f"Konvertierung abgeschlossen: {
-          args.input_file} -> {args.output_file}")
+    print(f"""Konvertierung abgeschlossen: {
+          args.input_file} -> {args.output_file}""")
 
     if args.pdf:
         pdf_file = os.path.splitext(args.output_file)[0] + '.pdf'
