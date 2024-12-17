@@ -3,6 +3,7 @@ import os
 import argparse
 import re
 import curses  # install with windows-curses on mac, leave on linux
+from tools.curses_wrapper import MenuSelector
 
 SSH_CONFIG_PATH = os.path.expanduser("~/.ssh/config")
 
@@ -36,48 +37,15 @@ def choose_host_or_ip():
     hosts = parse_ssh_config()
     host_list = list(hosts.keys())
 
-    def navigate_menu(stdscr):
-        curses.curs_set(0)
-        current_row = 0
-        input_ip = ""
+    selector = MenuSelector(
+        sorted(host_list), prompt="Select a host or enter an IP:")
+    selected_host = selector.select()
 
-        while True:
-            stdscr.clear()
-            stdscr.addstr(
-                0, 0, "Wähle einen Host oder gebe eine eigene IP ein:")
-            for idx, host in enumerate(host_list):
-                if idx == current_row:
-                    stdscr.addstr(
-                        idx + 1, 0, f"{idx + 1}. {host} ({hosts[host]['HostName']})", curses.A_REVERSE)
-                else:
-                    stdscr.addstr(
-                        idx + 1, 0, f"{idx + 1}. {host} ({hosts[host]['HostName']})")
-
-            stdscr.addstr(len(host_list) + 2, 0,
-                          "Oder gebe eine eigene IP ein:")
-            stdscr.addstr(len(host_list) + 3, 0, input_ip)
-            stdscr.refresh()
-
-            key = stdscr.getch()
-
-            if key == curses.KEY_UP and current_row > 0:
-                current_row -= 1
-            elif key == curses.KEY_DOWN and current_row < len(host_list) - 1:
-                current_row += 1
-            elif key == curses.KEY_ENTER or key in [10, 13]:
-                if current_row < len(host_list):
-                    return hosts[host_list[current_row]]['HostName'], hosts[host_list[current_row]]['User']
-                else:
-                    return input_ip, None
-            elif key in [curses.KEY_BACKSPACE, 127, 8]:  # Added 8 for compatibility
-                input_ip = input_ip[:-1]
-            elif key in range(32, 127):
-                input_ip += chr(key)
-
-    selected_host, user = curses.wrapper(navigate_menu)
-    if user is None:
-        user = input("Geben Sie den Benutzernamen für die IP ein: ")
-    return selected_host, user
+    if selected_host in hosts:
+        return hosts[selected_host]['HostName'], hosts[selected_host]['User']
+    else:
+        user = input("Enter the username for the IP: ")
+        return selected_host, user
 
 
 def ssh_copy(ip, user, folder_path, remote_path, direction):
@@ -99,11 +67,11 @@ def ssh_copy(ip, user, folder_path, remote_path, direction):
         # Führe den SCP-Befehl aus
         subprocess.run(scp_command, check=True)
         if direction == "to":
-            print(f"Erfolgreich kopiert: {
-                  folder_path} nach {ip}:{remote_path}")
+            print(
+                f"Erfolgreich kopiert: {folder_path} nach {ip}:{remote_path}")
         else:
-            print(f"Erfolgreich kopiert: {ip}:{
-                  remote_path} nach {folder_path}")
+            print(
+                f"Erfolgreich kopiert: {ip}: {remote_path} nach {folder_path}")
     except subprocess.CalledProcessError as e:
         print(f"Fehler beim Kopieren: {e}")
 
