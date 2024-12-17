@@ -125,9 +125,9 @@ def convert_tex_to_pdf(tex_file, pdf_file):
     filename = tex_file.split('.')[0]
     filenames = [f"{filename}.{ext}" for ext in [
         'aux', 'log', 'out', 'toc', 'tex', 'fdb_latexmk', 'fls']]
-    # for filename in filenames:
-    #     if os.path.exists(filename):
-    #         os.remove(filename)
+    for filename in filenames:
+        if os.path.exists(filename):
+            os.remove(filename)
 
 
 if __name__ == "__main__":
