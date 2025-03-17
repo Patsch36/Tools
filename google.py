@@ -20,13 +20,14 @@ class AcronymManager:
         """Reads an acronym and returns the associated URL."""
         acronym_parts = acronym.split(" ")
         acronyms = self._load_acronyms()
-        if len(acronym_parts) > 1:
-            for ac in acronyms.keys():
-                if all(part.lower() in ac.lower() for part in acronym_parts):
-                    return acronyms[ac]
-            print(f"No URL found for the acronym '{acronym}'.")
+        matching_acronyms = [url for ac, url in acronyms.items() if all(
+            part in ac.lower() for part in acronym_parts)]
+
+        if matching_acronyms:
+            return matching_acronyms[0]
         else:
-            return acronyms.get(acronym, None)
+            print(f"No URL found for the acronym '{acronym}'.")
+            return None
 
     def add_acronym(self, acronym, url):
         """Adds a new acronym with URL or overwrites it."""
