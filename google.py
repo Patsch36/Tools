@@ -20,9 +20,10 @@ class AcronymManager:
         """Reads an acronym and returns the associated URL."""
         acronym_parts = acronym.split(" ")
         acronyms = self._load_acronyms()
-        matching_acronyms = [url for ac, url in acronyms.items() if all(
-            part in ac.lower() for part in acronym_parts)]
-
+        matching_acronyms = [
+            url for ac, url in acronyms.items()
+            if all(part.lower() in ac.lower() for part in acronym_parts)
+        ]
         if matching_acronyms:
             return matching_acronyms[0]
         else:
