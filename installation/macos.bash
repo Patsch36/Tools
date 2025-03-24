@@ -25,6 +25,8 @@ sudo "$TOOLS_DIR/.env/bin/python" -m pip install --upgrade pip
 # Installiere die Bibliotheken aus requirements.txt
 sudo "$TOOLS_DIR/.env/bin/pip" install -r "$REQUIREMENTS"
 
+sudo "$TOOLS_DIR/.env/bin/pip" install pyobjc
+
 echo "=== Creating Scripts ==="
 
 # Erstelle ein Skript für jedes Python-Skript im Skripte-Ordner
