@@ -22,10 +22,11 @@ python -m venv .env
 :: Installiere die Bibliotheken aus requirements.txt
 %TOOLSDIR%\.env\Scripts\python.exe -m pip install -r "%REQUIREMENTS%"
 
-echo ===Installing windows-curses==================================
-
 :: Installiere windows-curses
 %TOOLSDIR%\.env\Scripts\python.exe -m pip install windows-curses
+
+:: installiere pillow + pyperclip
+%TOOLSDIR%\.env\Scripts\python.exe -m pip install pillow pyperclip
 
 echo ===Creating Custom Scripts=====================================
 
