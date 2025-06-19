@@ -63,4 +63,13 @@ done
 echo "export PATH=\$PATH:$TOOLS_DIR" >> ~/.bashrc
 source ~/.bashrc
 
+# Frage, ob das Skript auf einem Server installiert wird
+read -p "Wird dieses Setup auf einem Server (ohne GUI) installiert? (j/n; j:Display Variable wird gesetzt): " is_server
+if [[ "$is_server" =~ ^[JjYy]$ ]]; then
+    if ! grep -q "^export DISPLAY=:0" ~/.bashrc; then
+        echo "export DISPLAY=:0" >> ~/.bashrc
+        export DISPLAY=:0
+    fi
+fi
+
 echo "Setup abgeschlossen!"
