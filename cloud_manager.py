@@ -46,12 +46,23 @@ class ICloudUploaderDownloader:
 
         return folder
 
-    def upload_file(self, local_path: str, icloud_filename: str, icloud_folder: str):
-        """Lädt eine lokale Datei in iCloud hoch."""
+    def upload_file(self, local_path: str, icloud_filename: str, icloud_folder: str, overwrite: bool = False):
+        """Lädt eine lokale Datei in iCloud hoch. Überschreibt vorhandene Datei, wenn overwrite=True."""
         if not os.path.exists(local_path):
             sys.exit(f"Fehler: Datei '{local_path}' wurde nicht gefunden.")
 
         folder = self.get_or_create_folder(icloud_folder)
+
+        dir_list = folder.dir() or []
+        if icloud_filename in dir_list:
+            if not overwrite:
+                sys.exit(f"Fehler: Datei '{icloud_filename}' existiert bereits in '{icloud_folder}'. Zum Überschreiben --overwrite verwenden.")
+            else:
+                print(f"Warnung: Datei '{icloud_filename}' wird in '{icloud_folder}' überschrieben.")
+                # Optional: Löschen der alten Datei, falls API dies benötigt
+                file_node = folder.get(icloud_filename)
+                if file_node:
+                    file_node.delete()
 
         with open(local_path, 'rb') as file_in:
             mem_file = io.BytesIO(file_in.read())
@@ -112,7 +123,11 @@ def main():
     parser.add_argument(
         "--download-to", metavar="LOCAL_PATH", help="Lokaler Pfad für den Download"
     )
-
+    
+    parser.add_argument(
+        "--overwrite", action="store_true", help="Vorhandene Datei in iCloud überschreiben (nur beim Upload)"
+    )
+    
     args = parser.parse_args()
 
     apple_password = getpass("Geben Sie Ihr Apple-Passwort ein: ")
@@ -125,7 +140,8 @@ def main():
             icloud_client.upload_file(
                 local_path=args.upload,
                 icloud_filename=icloud_filename,
-                icloud_folder=args.folder
+                icloud_folder=args.folder,
+                overwrite=args.overwrite
             )
 
         if args.download and args.download_to:
