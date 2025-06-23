@@ -17,15 +17,15 @@ echo "=== Installing Python Environment ==="
 
 # Erstelle eine Python-Umgebung im .tools-Ordner
 cd "$TOOLS_DIR" || exit
-sudo python3 -m venv .env
+sudo python3 -m venv .tools_env
 
 # Aktualisiere pip
-sudo "$TOOLS_DIR/.env/bin/python" -m pip install --upgrade pip
+sudo "$TOOLS_DIR/.tools_env/bin/python" -m pip install --upgrade pip
 
 # Installiere die Bibliotheken aus requirements.txt
-sudo "$TOOLS_DIR/.env/bin/pip" install -r "$REQUIREMENTS"
+sudo "$TOOLS_DIR/.tools_env/bin/pip" install -r "$REQUIREMENTS"
 
-sudo "$TOOLS_DIR/.env/bin/pip" install pyobjc
+sudo "$TOOLS_DIR/.tools_env/bin/pip" install pyobjc
 
 echo "=== Creating Scripts ==="
 
@@ -60,7 +60,7 @@ for script in "$SCRIPTSDIR"/*.py; do
     fi
 
     # Erstelle das Bash-Skript für jedes Python-Skript
-    echo "#!/usr/bin/env $TOOLS_DIR/.env/bin/python3" > "$SCRIPTSDIR/$script_name"
+    echo "#!/usr/bin/env $TOOLS_DIR/.tools_env/bin/python3" > "$SCRIPTSDIR/$script_name"
     echo "$script_content" >> "$SCRIPTSDIR/$script_name"
 
     # Mach das Skript ausführbar
