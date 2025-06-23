@@ -2,7 +2,8 @@ import os
 import sys
 import io
 from icloudpy import ICloudPyService
-
+from getpass import getpass
+import argparse
 
 class ICloudUploaderDownloader:
     def __init__(self, apple_id: str, password: str):
@@ -45,12 +46,23 @@ class ICloudUploaderDownloader:
 
         return folder
 
-    def upload_file(self, local_path: str, icloud_filename: str, icloud_folder: str):
-        """Lädt eine lokale Datei in iCloud hoch."""
+    def upload_file(self, local_path: str, icloud_filename: str, icloud_folder: str, overwrite: bool = False):
+        """Lädt eine lokale Datei in iCloud hoch. Überschreibt vorhandene Datei, wenn overwrite=True."""
         if not os.path.exists(local_path):
             sys.exit(f"Fehler: Datei '{local_path}' wurde nicht gefunden.")
 
         folder = self.get_or_create_folder(icloud_folder)
+
+        dir_list = folder.dir() or []
+        if icloud_filename in dir_list:
+            if not overwrite:
+                sys.exit(f"Fehler: Datei '{icloud_filename}' existiert bereits in '{icloud_folder}'. Zum Überschreiben --overwrite verwenden.")
+            else:
+                print(f"Warnung: Datei '{icloud_filename}' wird in '{icloud_folder}' überschrieben.")
+                # Optional: Löschen der alten Datei, falls API dies benötigt
+                file_node = folder.get(icloud_filename)
+                if file_node:
+                    file_node.delete()
 
         with open(local_path, 'rb') as file_in:
             mem_file = io.BytesIO(file_in.read())
@@ -88,36 +100,64 @@ class ICloudUploaderDownloader:
         print(f"Datei '{icloud_filename}' erfolgreich nach '{target_local_path}' heruntergeladen.")
 
 
-
-
-
-# === KONFIGURATION ===
-APPLE_ID = "scheichpatrick@gmail.com"
-APPLE_PASSWORD = "Juergen**3600"
-LOKALER_DATEIPFAD = os.path.expanduser("~/.acronymes.txt")
-ZIEL_DATEINAME = "acronyms.txt"
-ZIEL_ORDNER = "botuments"
-ZIEL_DOWNLOAD_PFAD = os.path.expanduser("~/Downloads/acronyms_downloaded.txt")
-
-
 # === VERWENDUNG ===
-if __name__ == "__main__":
+def main():
+    parser = argparse.ArgumentParser(
+        description="iCloud Datei-Upload/Download Tool"
+    )
+    parser.add_argument(
+        "--apple-id", required=True, help="Ihre Apple ID"
+    )
+    parser.add_argument(
+        "--upload", metavar="LOCAL_PATH", help="Lokaler Pfad der Datei zum Hochladen"
+    )
+    parser.add_argument(
+        "--upload-name", metavar="ICLOUD_FILENAME", help="Dateiname in iCloud Drive (optional, Standard: wie lokal)"
+    )
+    parser.add_argument(
+        "--folder", required=True, help="Zielordner in iCloud Drive"
+    )
+    parser.add_argument(
+        "--download", metavar="ICLOUD_FILENAME", help="Dateiname in iCloud Drive zum Herunterladen"
+    )
+    parser.add_argument(
+        "--download-to", metavar="LOCAL_PATH", help="Lokaler Pfad für den Download"
+    )
+    
+    parser.add_argument(
+        "--overwrite", action="store_true", help="Vorhandene Datei in iCloud überschreiben (nur beim Upload)"
+    )
+    
+    args = parser.parse_args()
+
+    apple_password = getpass("Geben Sie Ihr Apple-Passwort ein: ")
+
     try:
-        icloud_client = ICloudUploaderDownloader(APPLE_ID, APPLE_PASSWORD)
+        icloud_client = ICloudUploaderDownloader(args.apple_id, apple_password)
 
-        # Upload der Datei
-        icloud_client.upload_file(
-            local_path=LOKALER_DATEIPFAD,
-            icloud_filename=ZIEL_DATEINAME,
-            icloud_folder=ZIEL_ORDNER
-        )
+        if args.upload:
+            icloud_filename = args.upload_name if args.upload_name else os.path.basename(args.upload)
+            icloud_client.upload_file(
+                local_path=args.upload,
+                icloud_filename=icloud_filename,
+                icloud_folder=args.folder,
+                overwrite=args.overwrite
+            )
 
-        # Download der Datei
-        icloud_client.download_file(
-            icloud_filename=ZIEL_DATEINAME,
-            icloud_folder=ZIEL_ORDNER,
-            target_local_path=ZIEL_DOWNLOAD_PFAD
-        )
+        if args.download and args.download_to:
+            icloud_client.download_file(
+                icloud_filename=args.download,
+                icloud_folder=args.folder,
+                target_local_path=args.download_to
+            )
+        elif args.download or args.download_to:
+            print("Für den Download müssen sowohl --download als auch --download-to angegeben werden.")
+
+        if not args.upload and not args.download:
+            print("Nichts zu tun. Bitte --upload oder --download angeben.")
 
     except Exception as e:
         print(f"Ein unerwarteter Fehler ist aufgetreten: {e}")
+
+if __name__ == "__main__":
+    main()

@@ -5,6 +5,8 @@ from googlesearch import search
 from tools.curses_wrapper import MenuSelector
 import os
 import requests
+import sys
+import signal
 
 # File path for the acronym directory
 ACRONYM_FILE_PATH = os.path.expanduser("~/.acronymes.txt")
@@ -187,8 +189,10 @@ class GoogleSearchHelper:
     def _handle_result(url, open_url):
         """Opens the URL or copies it to the clipboard."""
         if open_url:
-            webbrowser.open(url, new=2, autoraise=True)
+            import subprocess
+            subprocess.Popen(['brave', url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             print(f"Opening: {url}")
+            os.kill(os.getppid(), signal.SIGTERM)
         else:
             pyperclip.copy(url)
             print(f"URL copied to clipboard: {url}")
@@ -197,10 +201,6 @@ class GoogleSearchHelper:
 def main():
     parser = argparse.ArgumentParser(
         description="Google search script with acronym management")
-    parser.add_argument("search_term", nargs="?", default=None,
-                        help="The search term for Google or the result number")
-    parser.add_argument("result_num", nargs="?", default=0,
-                        help="The result number or the key string")
     parser.add_argument("-k", "--key", type=str,
                         help="Key string for filtering search results")
     parser.add_argument("-u", "--url_only", action="store_true",
@@ -213,6 +213,10 @@ def main():
                         const="", help="Specify acronym to delete or select interactively")
     parser.add_argument("-c", "--change_acronym", action="store_true", default=False,
                         help="Specify the acronyme to change.")
+    parser.add_argument("search_term", nargs="?", default=None,
+                        help="The search term for Google or the result number")
+    parser.add_argument("result_num", nargs="?", default=0,
+                        help="The result number or the key string")
 
     args = parser.parse_args()
     acronym_manager = AcronymManager(ACRONYM_FILE_PATH)
