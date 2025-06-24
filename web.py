@@ -190,9 +190,13 @@ class GoogleSearchHelper:
         """Opens the URL or copies it to the clipboard."""
         if open_url:
             import subprocess
-            subprocess.Popen(['brave', url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            print(f"Opening: {url}")
-            os.kill(os.getppid(), signal.SIGTERM)
+            import shutil
+            if shutil.which('brave'):
+                subprocess.Popen(['brave', url], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                print(f"Opening: {url}")
+                os.kill(os.getppid(), signal.SIGTERM)
+            else:
+                webbrowser.open(url)
         else:
             pyperclip.copy(url)
             print(f"URL copied to clipboard: {url}")
